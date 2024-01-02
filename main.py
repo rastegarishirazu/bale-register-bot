@@ -283,6 +283,3 @@ async def on_callback(callback: CallbackQuery):
 
 client.run()
 
-
-
-sshuttle -r moreza@91.198.77.247:21000 --dns  0/0 --disable-ipv6
