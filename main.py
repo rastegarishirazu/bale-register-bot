@@ -21,7 +21,6 @@ from content import (
     have_laptop_list,
 )
 
-
 myclient = pymongo.MongoClient("mongodb://localhost:27017/")
 mydb = myclient["baleBotDB"]
 db = mydb["students"]
@@ -213,9 +212,25 @@ async def select_social_activity(message):
     await select_buttom(message, RegisterMode.SOCIAL_ACTIVITY)
 
 
+function_map = {
+    RegisterMode.FIRST_NAME: register_first_name,
+    RegisterMode.LAST_NAME: register_last_name,
+    RegisterMode.NATIONAL_CODE: register_national_cod,
+    RegisterMode.GRADE: select_grade,
+    RegisterMode.PHONE_NUMBER: register_mobile_phone,
+    RegisterMode.SELECT_SCHOOL: select_school,
+    RegisterMode.PICK_BIRTHDAY: register_birthday,
+    RegisterMode.HAVE_LAPTOP: select_have_laptop,
+    RegisterMode.PROGRAMMING_LEVEL: select_programming_level,
+    RegisterMode.SOCIAL_ACTIVITY: select_social_activity,
+    RegisterMode.FUTURE_FILD: select_future_fild,
+    RegisterMode.WICH_TOWN: register_town
+}
+
+
 async def reply_to_answer(
-    user: User,
-    mode: RegisterMode,
+        user: User,
+        mode: RegisterMode,
 ):
     reply_markup_verify_name = InlineKeyboardMarkup()
     reply_markup_verify_name.add(
@@ -264,22 +279,24 @@ async def on_callback(callback: CallbackQuery):
     user = callback.user
     if "accept" in callback.data:
         await select_step(user, message)
-    elif callback.data == f"{RegisterMode.FIRST_NAME.value}:reject":
-        await register_first_name(message)
-    elif callback.data == f"{RegisterMode.LAST_NAME.value}:reject":
-        await register_last_name(message)
-    elif callback.data == f"{RegisterMode.NATIONAL_CODE.value}:reject":
-        await register_national_cod(message)
+    if 'reject' in callback.data:
+        mode = callback.data.split(':')[0]
+        await function_map[RegisterMode(mode)]
+        # if callback.data == f"{RegisterMode.FIRST_NAME.value}:reject":
+        #     await function_map[RegisterMode]
+        # elif callback.data == f"{RegisterMode.LAST_NAME.value}:reject":
+        #     await register_last_name(message)
+        # elif callback.data == f"{RegisterMode.NATIONAL_CODE.value}:reject":
+        #     await register_national_cod(message)
     elif (
-        RegisterMode.SELECT_SCHOOL.value in callback.data
-        or RegisterMode.GRADE.value in callback.data
-        or RegisterMode.PROGRAMMING_LEVEL.value in callback.data
-        or RegisterMode.HAVE_LAPTOP.value in callback.data
-        or RegisterMode.FUTURE_FILD.value in callback.data
-        or RegisterMode.SOCIAL_ACTIVITY.value in callback.data
+            RegisterMode.SELECT_SCHOOL.value in callback.data
+            or RegisterMode.GRADE.value in callback.data
+            or RegisterMode.PROGRAMMING_LEVEL.value in callback.data
+            or RegisterMode.HAVE_LAPTOP.value in callback.data
+            or RegisterMode.FUTURE_FILD.value in callback.data
+            or RegisterMode.SOCIAL_ACTIVITY.value in callback.data
     ):
         await save_buttom_selection(user, callback.data)
 
 
 client.run()
-
