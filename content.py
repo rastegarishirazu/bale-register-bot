@@ -36,11 +36,11 @@ personality_qustion = {
     RegisterMode.PHONE_NUMBER: "یه شماره تلفن همراه هم وارد کن. (اگه خودت موبایل نداری تفلن مامان یا بابا رو بده)",
     RegisterMode.GRADE: "کاس چندمی؟",
     RegisterMode.PICK_BIRTHDAY: "تاریخ تولدت رو وارد کن. مثلا این شکلی(1375/8/6)",
-    RegisterMode.HAVE_LAPTOP: "لپ تاپ داری؟ (اگه مال مامان و بابا هم باشه بتونی ازشون قرض بگیری هم قبوله) توجه کن که لپ تاپ داشتن این امتیازی برای ثبت نام به حساب نمیاد.",
+    RegisterMode.HAVE_LAPTOP: "لپ تاپ داری؟ (اگه مال مامان و بابا هم باشه بتونی ازشون قرض بگیری هم قبوله) توجه کن که لپ تاپ داشتن، امتیازی برای ثبت نام به حساب نمیاد.",
     RegisterMode.PROGRAMMING_LEVEL: "چقدر با برنامه نویسی آشنا هستی؟",
     RegisterMode.SOCIAL_ACTIVITY: "کجا فعالیت میکنی؟",
     RegisterMode.FUTURE_FILD: "چه رشتی ای هستی؟ یا در آینده چه رشته ای میخوای بری؟",
-    RegisterMode.WICH_TOWN: "خونه تون کجاست؟ _(توی چه محله ای)",
+    RegisterMode.WICH_TOWN: "خونه تون کجاست؟ (توی چه محله ای)",
 }
 future_fild_list = ["ریاضی", "تجربی", "انسانی", "هنرستان"]
 have_laptop_list = ["دارم", "ندارم"]

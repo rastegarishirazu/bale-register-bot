@@ -279,9 +279,10 @@ async def on_callback(callback: CallbackQuery):
     user = callback.user
     if "accept" in callback.data:
         await select_step(user, message)
-    if 'reject' in callback.data:
+    elif 'reject' in callback.data:
         mode = callback.data.split(':')[0]
-        await function_map[RegisterMode(mode)]
+        print(function_map[RegisterMode(mode)])
+        await function_map[RegisterMode(mode)](message)
         # if callback.data == f"{RegisterMode.FIRST_NAME.value}:reject":
         #     await function_map[RegisterMode]
         # elif callback.data == f"{RegisterMode.LAST_NAME.value}:reject":
@@ -296,6 +297,7 @@ async def on_callback(callback: CallbackQuery):
             or RegisterMode.FUTURE_FILD.value in callback.data
             or RegisterMode.SOCIAL_ACTIVITY.value in callback.data
     ):
+        print(callback.data)
         await save_buttom_selection(user, callback.data)
 
 
