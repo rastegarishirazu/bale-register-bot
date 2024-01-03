@@ -1,11 +1,14 @@
 import pymongo
+import sys
 from content import RegisterMode
 
 myclient = pymongo.MongoClient("mongodb://localhost:27017/")
 mydb = myclient["baleBotDB"]
 db = mydb["students"]
-db.drop()
-# db.insert_one({"_id": "1234"})
-# db.update_one({"_id": "1234"}, {"$set": {RegisterMode.FIRST_NAME.value: "ali"}})
-# std = db.find_one({"_id": "1234"})
-# print(std)
+
+if __name__ == '__main__':
+    if len(sys.argv) == 2 and sys.argv[1] == 'RESET-DB':
+        db.drop()
+        print('data base cleaned!')
+    else:
+        print('use RESET-DB')
