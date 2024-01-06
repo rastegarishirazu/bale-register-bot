@@ -8,6 +8,7 @@ from bale import (
     MenuKeyboardButton,
     User,
 )
+from setting import BALE_TOKEN
 import pymongo
 from content import (
     SAY_WELLCOME,
@@ -24,8 +25,6 @@ from content import (
 myclient = pymongo.MongoClient("mongodb://localhost:27017/")
 mydb = myclient["baleBotDB"]
 db = mydb["students"]
-BOT_TOKEN = "6782619800:AAES1QsUThVE0-AdSEIVDmK_0RmMzpTV-tI"
-BALE_TOKEN = "1811549661:kjsfBDLPPg2o84QZl9gvvBzlki8uFc7i787sGorS"
 
 client = Bot(token=BALE_TOKEN)
 
@@ -112,38 +111,38 @@ def updata_student(user: User, data: dict):
     db.update_one({"_id": f"{user.user_id}"}, {"$set": data})
 
 
-async def select_step(user: User, message: Message):
+async def select_step(user: User):
     student = get_student_from_user(user)
     if student:
         if RegisterMode.FIRST_NAME.value not in student:
-            await register_first_name(message)
+            await register_first_name(user)
         elif RegisterMode.LAST_NAME.value not in student:
-            await register_last_name(message)
+            await register_last_name(user)
         elif RegisterMode.NATIONAL_CODE.value not in student:
-            await register_national_cod(message)
+            await register_national_cod(user)
         elif RegisterMode.SELECT_SCHOOL.value not in student:
-            await select_school(message)
+            await select_school(user)
         elif RegisterMode.PHONE_NUMBER.value not in student:
-            await register_mobile_phone(message)
+            await register_mobile_phone(user)
         elif RegisterMode.GRADE.value not in student:
-            await select_grade(message)
+            await select_grade(user)
         elif RegisterMode.PICK_BIRTHDAY.value not in student:
-            await register_birthday(message)
+            await register_birthday(user)
         elif RegisterMode.PROGRAMMING_LEVEL.value not in student:
-            await select_programming_level(message)
+            await select_programming_level(user)
         elif RegisterMode.FUTURE_FILD.value not in student:
-            await select_future_fild(message)
+            await select_future_fild(user)
         elif RegisterMode.HAVE_LAPTOP.value not in student:
-            await select_have_laptop(message)
+            await select_have_laptop(user)
         elif RegisterMode.SOCIAL_ACTIVITY.value not in student:
-            await select_social_activity(message)
+            await select_social_activity(user)
         elif RegisterMode.WICH_TOWN.value not in student:
-            await register_town(message)
+            await register_town(user)
         else:
             await user.send("finish")
 
 
-async def select_buttom(message: Message, mode: RegisterMode):
+async def select_button(user: User, mode: RegisterMode):
     markup_select_school = InlineKeyboardMarkup()
     for i in range(len(selection_bottom_list[mode])):
         markup_select_school.add(
@@ -153,63 +152,63 @@ async def select_buttom(message: Message, mode: RegisterMode):
             ),
             row=i // 2 + 1,
         )
-    await message.chat.send(personality_qustion[mode], components=markup_select_school)
+    await user.send(personality_qustion[mode], components=markup_select_school)
 
 
-async def save_buttom_selection(user: User, data: str):
+async def save_button_selection(user: User, data: str):
     callback_data = data.split(":")
     str_mode = callback_data[0]
-    index_of_buttom = int(callback_data[1])
-    updata_student(user, {str_mode: selection_bottom_list[RegisterMode(str_mode)][index_of_buttom]})  # type: ignore
+    index_of_button = int(callback_data[1])
+    updata_student(user, {str_mode: selection_bottom_list[RegisterMode(str_mode)][index_of_button]})  # type: ignore
     await reply_to_answer(user, RegisterMode(str_mode))
 
 
-async def register_first_name(message: Message):
-    await register_personality(message, RegisterMode.FIRST_NAME)
+async def register_first_name(user: User):
+    await register_personality(user, RegisterMode.FIRST_NAME)
 
 
-async def register_last_name(message: Message):
-    await register_personality(message, RegisterMode.LAST_NAME)
+async def register_last_name(user: User):
+    await register_personality(user, RegisterMode.LAST_NAME)
 
 
-async def register_national_cod(message: Message):
-    await register_personality(message, RegisterMode.NATIONAL_CODE)
+async def register_national_cod(user: User):
+    await register_personality(user, RegisterMode.NATIONAL_CODE)
 
 
-async def register_mobile_phone(message):
-    await register_personality(message, RegisterMode.PHONE_NUMBER)
+async def register_mobile_phone(user: User):
+    await register_personality(user, RegisterMode.PHONE_NUMBER)
 
 
-async def register_town(message):
-    await register_personality(message, RegisterMode.WICH_TOWN)
+async def register_town(user: User):
+    await register_personality(user, RegisterMode.WICH_TOWN)
 
 
-async def register_birthday(message):
-    await register_personality(message, RegisterMode.PICK_BIRTHDAY)
+async def register_birthday(user: User):
+    await register_personality(user, RegisterMode.PICK_BIRTHDAY)
 
 
-async def select_school(message):
-    await select_buttom(message, RegisterMode.SELECT_SCHOOL)
+async def select_school(user: User):
+    await select_button(user, RegisterMode.SELECT_SCHOOL)
 
 
-async def select_grade(message):
-    await select_buttom(message, RegisterMode.GRADE)
+async def select_grade(user: User):
+    await select_button(user, RegisterMode.GRADE)
 
 
-async def select_programming_level(message):
-    await select_buttom(message, RegisterMode.PROGRAMMING_LEVEL)
+async def select_programming_level(user: User):
+    await select_button(user, RegisterMode.PROGRAMMING_LEVEL)
 
 
-async def select_future_fild(message):
-    await select_buttom(message, RegisterMode.FUTURE_FILD)
+async def select_future_fild(user: User):
+    await select_button(user, RegisterMode.FUTURE_FILD)
 
 
-async def select_have_laptop(message):
-    await select_buttom(message, RegisterMode.HAVE_LAPTOP)
+async def select_have_laptop(user: User):
+    await select_button(user, RegisterMode.HAVE_LAPTOP)
 
 
-async def select_social_activity(message):
-    await select_buttom(message, RegisterMode.SOCIAL_ACTIVITY)
+async def select_social_activity(user: User):
+    await select_button(user, RegisterMode.SOCIAL_ACTIVITY)
 
 
 function_map = {
@@ -231,24 +230,28 @@ function_map = {
 async def reply_to_answer(
         user: User,
         mode: RegisterMode,
+        verify: bool = False
 ):
-    reply_markup_verify_name = InlineKeyboardMarkup()
-    reply_markup_verify_name.add(
-        InlineKeyboardButton(text="آره", callback_data=f"{mode.value}:accept")
-    )
-    reply_markup_verify_name.add(
-        InlineKeyboardButton(text="ویرایش", callback_data=f"{mode.value}:reject")
-    )
-    message_reply = reply_to_asnwer_message(user, mode)
-
+    if not verify:
+        await select_step(user)
+        return
+    else:
+        message_reply = reply_to_asnwer_message(user, mode)
+        reply_markup_verify_name = InlineKeyboardMarkup()
+        reply_markup_verify_name.add(
+            InlineKeyboardButton(text="آره", callback_data=f"{mode.value}:accept")
+        )
+        reply_markup_verify_name.add(
+            InlineKeyboardButton(text="ویرایش", callback_data=f"{mode.value}:reject")
+        )
     await user.send(
         message_reply,
         components=reply_markup_verify_name,
     )
 
 
-async def register_personality(message: Message, mode: RegisterMode):
-    await message.chat.send(personality_qustion[mode])
+async def register_personality(user: User, mode: RegisterMode):
+    await user.send(personality_qustion[mode])
     student_answer = await client.wait_for("message", check=answer_checker)
     if student_answer.from_user:
         updata_student(student_answer.from_user, {mode.value: student_answer.content})
@@ -264,7 +267,7 @@ async def on_message(message: Message):
         student = get_student_from_user(message.from_user)
         if not student:
             db.insert_one({"_id": f"{message.from_user.user_id}"})
-        await select_step(message.from_user, message)  # type: ignore
+        await select_step(message.from_user)  # type: ignore
         reply_markup = InlineKeyboardMarkup()
         reply_markup.add(
             InlineKeyboardButton(
@@ -278,11 +281,10 @@ async def on_callback(callback: CallbackQuery):
     message = callback.message
     user = callback.user
     if "accept" in callback.data:
-        await select_step(user, message)
+        await select_step(user)
     elif 'reject' in callback.data:
         mode = callback.data.split(':')[0]
-        print(function_map[RegisterMode(mode)])
-        await function_map[RegisterMode(mode)](message)
+        await function_map[RegisterMode(mode)](message.from_user)
         # if callback.data == f"{RegisterMode.FIRST_NAME.value}:reject":
         #     await function_map[RegisterMode]
         # elif callback.data == f"{RegisterMode.LAST_NAME.value}:reject":
@@ -297,8 +299,10 @@ async def on_callback(callback: CallbackQuery):
             or RegisterMode.FUTURE_FILD.value in callback.data
             or RegisterMode.SOCIAL_ACTIVITY.value in callback.data
     ):
-        print(callback.data)
-        await save_buttom_selection(user, callback.data)
+        await save_button_selection(user, callback.data)
 
-
-client.run()
+while True:
+    try:
+        client.run()
+    except Exception as ex:
+        print(ex)
