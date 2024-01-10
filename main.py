@@ -1,3 +1,7 @@
+import csv
+import time
+from pprint import pprint
+
 from bale import (
     Bot,
     CallbackQuery,
@@ -6,9 +10,9 @@ from bale import (
     InlineKeyboardButton,
     MenuKeyboardMarkup,
     MenuKeyboardButton,
-    User,
+    User, InputFile,
 )
-from setting import BALE_TOKEN
+from setting import BALE_TOKEN, BACKUP_CHANEL
 import pymongo
 from content import (
     SAY_WELLCOME,
@@ -19,8 +23,9 @@ from content import (
     list_of_programming_level,
     social_activity_list,
     future_fild_list,
-    have_laptop_list,
+    have_laptop_list, SAY_BYE, chanel_address, register_mode_fild_name, MENU_LIST,
 )
+from utils.menu import create_menu, edit_menu
 
 myclient = pymongo.MongoClient("mongodb://localhost:27017/")
 mydb = myclient["baleBotDB"]
@@ -34,7 +39,16 @@ async def on_ready():
     print(client.user, "is Ready!")
 
 
-selection_bottom_list = {
+def send_register_data_until_now(user: User):
+    student = get_student_from_user(user)
+    message = ''
+    for item in student:
+        if item != '_id':
+            message += student[item] + '\n'
+    user.send(message)
+
+
+selection_button_list = {
     RegisterMode.SELECT_SCHOOL: list_of_schools,
     RegisterMode.GRADE: list_of_grade,
     RegisterMode.PROGRAMMING_LEVEL: list_of_programming_level,
@@ -92,13 +106,13 @@ def reply_to_asnwer_message(user: User, mode: RegisterMode) -> str:
     return "به خطا خوریدم!"
 
 
-async def say_hello(message: Message):
-    await message.chat.send(SAY_WELLCOME)
+async def say_hello(message: Message, component=None):
+    await message.chat.send(SAY_WELLCOME, components=component)
 
 
 def answer_checker(message: Message) -> bool:
     if message.text:
-        return "/start" not in message.text
+        return message.text not in MENU_LIST
     return False
 
 
@@ -139,28 +153,38 @@ async def select_step(user: User):
         elif RegisterMode.WICH_TOWN.value not in student:
             await register_town(user)
         else:
-            await user.send("finish")
+            await user.send(SAY_BYE)
 
 
 async def select_button(user: User, mode: RegisterMode):
-    markup_select_school = InlineKeyboardMarkup()
-    for i in range(len(selection_bottom_list[mode])):
-        markup_select_school.add(
+    markup_select = InlineKeyboardMarkup()
+    for i in range(len(selection_button_list[mode])):
+        markup_select.add(
             InlineKeyboardButton(
-                text=selection_bottom_list[mode][i],
+                text=selection_button_list[mode][i],
                 callback_data=f"{mode.value}:{i}",
             ),
             row=i // 2 + 1,
         )
-    await user.send(personality_qustion[mode], components=markup_select_school)
+    await user.send(personality_qustion[mode], components=markup_select)
 
 
 async def save_button_selection(user: User, data: str):
     callback_data = data.split(":")
     str_mode = callback_data[0]
     index_of_button = int(callback_data[1])
-    updata_student(user, {str_mode: selection_bottom_list[RegisterMode(str_mode)][index_of_button]})  # type: ignore
+    updata_student(user, {str_mode: selection_button_list[RegisterMode(str_mode)][index_of_button]})  # type: ignore
     await reply_to_answer(user, RegisterMode(str_mode))
+
+
+def student_info(student: dict):
+    message = ''
+    for fild in student:
+        if fild != '_id':
+            mode = RegisterMode(fild)
+            title = register_mode_fild_name[mode]
+            message += f'{title}: {student[fild]}\n'
+    return message
 
 
 async def register_first_name(user: User):
@@ -260,20 +284,44 @@ async def register_personality(user: User, mode: RegisterMode):
     await reply_to_answer(student_answer.from_user, mode)
 
 
+def backup():
+    dv_cursor = db.find()
+    list_of_student = []
+    for i in dv_cursor:
+        list_of_student.append(i)
+    keys = list_of_student[0].keys()
+    with open('backup.csv', 'w+') as output_file:
+        dict_writer = csv.DictWriter(output_file, keys)
+        dict_writer.writeheader()
+        dict_writer.writerows(list_of_student)
+    with open('backup.csv', 'rb') as upload_file:
+        file = InputFile(upload_file.read())
+        return file
+
+
+
 @client.event
 async def on_message(message: Message):
-    if message.content == "/start":
-        await say_hello(message)
-        student = get_student_from_user(message.from_user)
+    student = get_student_from_user(message.from_user)
+    if message.content == '/backup':
+        file = backup()
+        await client.send_document(BACKUP_CHANEL, file, caption=f'{time.ctime(time.time())}')
+        await message.reply('done')
+
+    elif message.content in ['/start', '/شروع (ادامه)']:
         if not student:
+            menu = create_menu()
+            await say_hello(message, menu)
             db.insert_one({"_id": f"{message.from_user.user_id}"})
         await select_step(message.from_user)  # type: ignore
-        reply_markup = InlineKeyboardMarkup()
-        reply_markup.add(
-            InlineKeyboardButton(
-                text="سلام علیکم", callback_data="python-bale-bot:help"
-            )
-        )
+    elif message.content == '/ویرایش':
+        menu = edit_menu()
+        await message.reply("کدام قسمت را میخواهید تغییر دهید؟", components=menu)
+    elif message.content == '/کانال':
+        await message.reply(text=chanel_address)
+    elif message.content == '/مشاهده_اطلاعات':
+        student_info_message = student_info(student)
+        await message.reply(text=student_info_message)
 
 
 @client.event
@@ -285,13 +333,12 @@ async def on_callback(callback: CallbackQuery):
     elif 'reject' in callback.data:
         mode = callback.data.split(':')[0]
         await function_map[RegisterMode(mode)](message.from_user)
-        # if callback.data == f"{RegisterMode.FIRST_NAME.value}:reject":
-        #     await function_map[RegisterMode]
-        # elif callback.data == f"{RegisterMode.LAST_NAME.value}:reject":
-        #     await register_last_name(message)
-        # elif callback.data == f"{RegisterMode.NATIONAL_CODE.value}:reject":
-        #     await register_national_cod(message)
+    elif 'edit' in callback.data:
+        value_mode = callback.data.split(':')[0]
+        mode = RegisterMode(value_mode)
+        await function_map[mode](user)
     elif (
+
             RegisterMode.SELECT_SCHOOL.value in callback.data
             or RegisterMode.GRADE.value in callback.data
             or RegisterMode.PROGRAMMING_LEVEL.value in callback.data
@@ -300,6 +347,7 @@ async def on_callback(callback: CallbackQuery):
             or RegisterMode.SOCIAL_ACTIVITY.value in callback.data
     ):
         await save_button_selection(user, callback.data)
+
 
 while True:
     try:

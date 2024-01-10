@@ -19,6 +19,21 @@ class RegisterMode(Enum):
     WICH_TOWN = "town"
 
 
+register_mode_fild_name = {
+    RegisterMode.FIRST_NAME: "نام",
+    RegisterMode.LAST_NAME: "نام خانوادگی",
+    RegisterMode.NATIONAL_CODE: "کد ملی",
+    RegisterMode.GRADE: "پایه",
+    RegisterMode.PHONE_NUMBER: "تلفن",
+    RegisterMode.SELECT_SCHOOL: "مدرسه",
+    RegisterMode.PICK_BIRTHDAY: "تاریخ تولد",
+    RegisterMode.HAVE_LAPTOP: "لپ تاپ داری؟",
+    RegisterMode.PROGRAMMING_LEVEL: "برنامه نویسی",
+    RegisterMode.SOCIAL_ACTIVITY: "فعالیت",
+    RegisterMode.FUTURE_FILD: "رشته",
+    RegisterMode.WICH_TOWN: "محله"
+}
+
 SAY_WELLCOME = """سلام رفیق!
 تا همین جا هم که اومدی یعنی کارت درسته.
 خب! قطعا میدونی که این ربات برای ثبت نام توی دوره »ایران آینده« طراحی شده. از اونجایی که توی این دوره فقط کلاس نهمی و دهمی های ریاضی رو ثبت نام میکنیم؛
@@ -26,7 +41,9 @@ SAY_WELLCOME = """سلام رفیق!
 احتمالش کمه که قبول بشی ولی ناامید هم نشو. شاید تو تنها استثنای این دوره باشی.
 خب دیگه خیلی حرف زدیم بریم سراغ ثبت نام."""
 
-INPUT_NAME = "نام و نام خواندگی رو ارسال کنید:"
+SAY_BYE = '''ثبت نامت با موفقیت به پایان رسید.
+امیدوارم هر چه زود تر ببینمت!
+مراحل بعدی رو از کانال ما دنبال کن.'''
 
 personality_qustion = {
     RegisterMode.FIRST_NAME: "اسمت چیه؟ (فقط اسم کوچیک)",
@@ -63,3 +80,7 @@ list_of_programming_level = [
 ]
 
 social_activity_list = ["بسیج محله", "هیئت", "مدرسه", "فعالیت های فرهنگی خارج از مدرسه"]
+
+chanel_address = 'https://bale.ir/iranno'
+
+MENU_LIST = ['/شروع (ادامه)', '/ویرایش', '/مشاهده_اطلاعات', '/کانال']
