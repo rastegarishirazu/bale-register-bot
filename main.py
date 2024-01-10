@@ -153,6 +153,7 @@ async def select_step(user: User):
         elif RegisterMode.WICH_TOWN.value not in student:
             await register_town(user)
         else:
+            await client.send_message(BACKUP_CHANEL,text=student_info(student))
             await user.send(SAY_BYE, components=create_menu())
 
 
