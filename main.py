@@ -153,7 +153,7 @@ async def select_step(user: User):
         elif RegisterMode.WICH_TOWN.value not in student:
             await register_town(user)
         else:
-            await user.send(SAY_BYE)
+            await user.send(SAY_BYE, components=create_menu())
 
 
 async def select_button(user: User, mode: RegisterMode):
