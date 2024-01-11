@@ -84,6 +84,6 @@ list_of_programming_level = [
 
 social_activity_list = ["بسیج محله", "هیئت", "مدرسه", "فعالیت های فرهنگی خارج از مدرسه"]
 
-chanel_address = 'https://bale.ir/iranno'
+chanel_address = 'https://ble.ir/iranno'
 
 MENU_LIST = ['/شروع (ادامه)', '/ویرایش', '/مشاهده_اطلاعات', '/کانال']
