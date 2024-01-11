@@ -288,7 +288,7 @@ async def register_personality(user: User, mode: RegisterMode, check_func=None):
     if student_answer:
         if check_func and not check_func(student_answer.content):
             await student_answer.reply('مقدار وارد شده صحیح نمیباشد.')
-            return None
+            return register_personality(user, mode, check_func)
         if student_answer.from_user:
             updata_student(student_answer.from_user, {mode.value: student_answer.content})
         else:
