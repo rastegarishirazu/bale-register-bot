@@ -23,9 +23,10 @@ from content import (
     list_of_programming_level,
     social_activity_list,
     future_fild_list,
-    have_laptop_list, SAY_BYE, chanel_address, register_mode_fild_name, MENU_LIST,
+    have_laptop_list, SAY_BYE, chanel_address, register_mode_fild_name, MENU_LIST, SAY_FINISHED,
 )
 from utils.menu import create_menu, edit_menu
+from utils.national_code_checker import verify_national_code
 
 myclient = pymongo.MongoClient("mongodb://localhost:27017/")
 mydb = myclient["baleBotDB"]
@@ -112,7 +113,7 @@ async def say_hello(message: Message, component=None):
 
 def answer_checker(message: Message) -> bool:
     if message.text:
-        return message.text not in MENU_LIST
+        return message.text not in MENU_LIST and message.text not in ['/start']
     return False
 
 
@@ -153,8 +154,14 @@ async def select_step(user: User):
         elif RegisterMode.WICH_TOWN.value not in student:
             await register_town(user)
         else:
-            await client.send_message(BACKUP_CHANEL,text=student_info(student))
-            await user.send(SAY_BYE, components=create_menu())
+            if student['finished']:
+                backup_message_id = student['backup_message_id']
+                await client.edit_message(BACKUP_CHANEL, backup_message_id, text=student_info(student))
+                await user.send(SAY_FINISHED, components=create_menu())
+            else:
+                message = await client.send_message(BACKUP_CHANEL, text=student_info(student))
+                updata_student(user, {'backup_message_id': message.message_id, 'finished': True})
+                await user.send(SAY_BYE, components=create_menu())
 
 
 async def select_button(user: User, mode: RegisterMode):
@@ -165,7 +172,7 @@ async def select_button(user: User, mode: RegisterMode):
                 text=selection_button_list[mode][i],
                 callback_data=f"{mode.value}:{i}",
             ),
-            row=i // 2 + 1,
+            row=i + 1,
         )
     await user.send(personality_qustion[mode], components=markup_select)
 
@@ -181,7 +188,7 @@ async def save_button_selection(user: User, data: str):
 def student_info(student: dict):
     message = ''
     for fild in student:
-        if fild != '_id':
+        if fild not in ['_id', 'finished', 'backup_message_id']:
             mode = RegisterMode(fild)
             title = register_mode_fild_name[mode]
             message += f'{title}: {student[fild]}\n'
@@ -197,7 +204,7 @@ async def register_last_name(user: User):
 
 
 async def register_national_cod(user: User):
-    await register_personality(user, RegisterMode.NATIONAL_CODE)
+    await register_personality(user, RegisterMode.NATIONAL_CODE, verify_national_code)
 
 
 async def register_mobile_phone(user: User):
@@ -255,9 +262,9 @@ function_map = {
 async def reply_to_answer(
         user: User,
         mode: RegisterMode,
-        verify: bool = False
+        verify_needed: bool = False
 ):
-    if not verify:
+    if not verify_needed:
         await select_step(user)
         return
     else:
@@ -275,13 +282,18 @@ async def reply_to_answer(
     )
 
 
-async def register_personality(user: User, mode: RegisterMode):
+async def register_personality(user: User, mode: RegisterMode, check_func=None):
     await user.send(personality_qustion[mode])
     student_answer = await client.wait_for("message", check=answer_checker)
-    if student_answer.from_user:
-        updata_student(student_answer.from_user, {mode.value: student_answer.content})
-    else:
-        print("error in student_answer")
+    if student_answer:
+        if check_func and not check_func(student_answer.content):
+            await student_answer.reply('مقدار وارد شده صحیح نمیباشد.')
+            return None
+        if student_answer.from_user:
+            updata_student(student_answer.from_user, {mode.value: student_answer.content})
+        else:
+            print("error in student_answer")
+
     await reply_to_answer(student_answer.from_user, mode)
 
 
@@ -300,7 +312,6 @@ def backup():
         return file
 
 
-
 @client.event
 async def on_message(message: Message):
     student = get_student_from_user(message.from_user)
@@ -313,7 +324,7 @@ async def on_message(message: Message):
         if not student:
             menu = create_menu()
             await say_hello(message, menu)
-            db.insert_one({"_id": f"{message.from_user.user_id}"})
+            db.insert_one({"_id": f"{message.from_user.user_id}", 'finished': False})
         await select_step(message.from_user)  # type: ignore
     elif message.content == '/ویرایش':
         menu = edit_menu()
