@@ -167,10 +167,14 @@ async def select_step(user: User):
 async def select_button(user: User, mode: RegisterMode):
     markup_select = InlineKeyboardMarkup()
     for i in range(len(selection_button_list[mode])):
+        if '/' in selection_button_list[mode][i]:
+            data = selection_button_list[mode][i]
+        else:
+            data = i
         markup_select.add(
             InlineKeyboardButton(
                 text=selection_button_list[mode][i],
-                callback_data=f"{mode.value}:{i}",
+                callback_data=f"{mode.value}:{data}",
             ),
             row=i + 1,
         )
@@ -222,6 +226,8 @@ async def register_birthday(user: User):
 async def select_school(user: User):
     await select_button(user, RegisterMode.SELECT_SCHOOL)
 
+async def write_school(user: User):
+    await register_personality(user, RegisterMode.SELECT_SCHOOL)
 
 async def select_grade(user: User):
     await select_button(user, RegisterMode.GRADE)
@@ -349,6 +355,8 @@ async def on_callback(callback: CallbackQuery):
         value_mode = callback.data.split(':')[0]
         mode = RegisterMode(value_mode)
         await function_map[mode](user)
+    elif "/مدارس‌ دیگر" in callback.data:
+        await write_school(user)
     elif (
 
             RegisterMode.SELECT_SCHOOL.value in callback.data
