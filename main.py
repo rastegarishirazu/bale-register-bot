@@ -23,7 +23,7 @@ from content import (
     list_of_programming_level,
     social_activity_list,
     future_fild_list,
-    have_laptop_list, SAY_BYE, chanel_address, register_mode_fild_name, MENU_LIST, SAY_FINISHED,
+    have_laptop_list, SAY_BYE, chanel_address, register_mode_fild_name, MENU_LIST, SAY_FINISHED, sex_list,
 )
 from utils.menu import create_menu, edit_menu
 from utils.national_code_checker import verify_national_code
@@ -56,6 +56,7 @@ selection_button_list = {
     RegisterMode.FUTURE_FILD: future_fild_list,
     RegisterMode.SOCIAL_ACTIVITY: social_activity_list,
     RegisterMode.HAVE_LAPTOP: have_laptop_list,
+    RegisterMode.SEX: sex_list
 }
 
 
@@ -133,6 +134,8 @@ async def select_step(user: User):
             await register_first_name(user)
         elif RegisterMode.LAST_NAME.value not in student:
             await register_last_name(user)
+        elif RegisterMode.SEX.value not in student:
+            await select_sex(user)
         elif RegisterMode.NATIONAL_CODE.value not in student:
             await register_national_cod(user)
         elif RegisterMode.SELECT_SCHOOL.value not in student:
@@ -226,11 +229,17 @@ async def register_birthday(user: User):
 async def select_school(user: User):
     await select_button(user, RegisterMode.SELECT_SCHOOL)
 
+
 async def write_school(user: User):
     await register_personality(user, RegisterMode.SELECT_SCHOOL)
 
+
 async def select_grade(user: User):
     await select_button(user, RegisterMode.GRADE)
+
+
+async def select_sex(user: User):
+    await select_button(user, RegisterMode.SEX)
 
 
 async def select_programming_level(user: User):
@@ -332,7 +341,7 @@ async def on_message(message: Message):
             await say_hello(message, menu)
             db.insert_one({"_id": f"{message.from_user.user_id}", 'finished': False})
         await select_step(message.from_user)  # type: ignore
-    elif message.content == '/ویرایش':
+    elif message.content == '/ویرایش' or message.content == '/edit':
         menu = edit_menu()
         await message.reply("کدام قسمت را میخواهید تغییر دهید؟", components=menu)
     elif message.content == '/کانال':
@@ -365,6 +374,7 @@ async def on_callback(callback: CallbackQuery):
             or RegisterMode.HAVE_LAPTOP.value in callback.data
             or RegisterMode.FUTURE_FILD.value in callback.data
             or RegisterMode.SOCIAL_ACTIVITY.value in callback.data
+            or RegisterMode.SEX.value in callback.data
     ):
         await save_button_selection(user, callback.data)
 

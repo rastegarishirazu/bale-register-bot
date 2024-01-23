@@ -8,6 +8,7 @@ class RegisterMode(Enum):
     FIRST_NAME = "first_name"
     LAST_NAME = "last_name"
     NATIONAL_CODE = "national_code"
+    SEX = 'sex'
     GRADE = "grade"
     PHONE_NUMBER = "phone_number"
     SELECT_SCHOOL = "school"
@@ -22,6 +23,7 @@ class RegisterMode(Enum):
 register_mode_fild_name = {
     RegisterMode.FIRST_NAME: "نام",
     RegisterMode.LAST_NAME: "نام خانوادگی",
+    RegisterMode.SEX: 'جنسیت',
     RegisterMode.NATIONAL_CODE: "کد ملی",
     RegisterMode.GRADE: "پایه",
     RegisterMode.PHONE_NUMBER: "تلفن",
@@ -52,6 +54,7 @@ personality_qustion = {
     RegisterMode.FIRST_NAME: "اسمت چیه؟ (فقط اسم کوچیک)",
     RegisterMode.LAST_NAME: "فامیلیت چیه؟",
     RegisterMode.NATIONAL_CODE: "کد ملی ات چنده؟",
+    RegisterMode.SEX: 'آقا پسر یا خانم دختر؟',
     RegisterMode.SELECT_SCHOOL: "توی چه مدرسه ای درس میخونی؟",
     RegisterMode.PHONE_NUMBER: "یه شماره تلفن همراه هم وارد کن. (اگه خودت موبایل نداری تفلن مامان یا بابا رو بده)",
     RegisterMode.GRADE: "کاس چندمی؟",
@@ -63,6 +66,7 @@ personality_qustion = {
     RegisterMode.WICH_TOWN: "خونه تون کجاست؟ (توی چه محله ای)",
 }
 future_fild_list = ["ریاضی", "تجربی", "انسانی", "هنرستان"]
+sex_list = ['پسر', 'دختر']
 have_laptop_list = ["دارم", "ندارم"]
 list_of_schools = [
     "دستغیب 1",
