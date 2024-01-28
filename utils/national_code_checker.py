@@ -17,8 +17,7 @@ def verify_national_code(national_cole: str):
         factor = i + 2
         sum_digit += int(nine_digit[i]) * factor
     remainder = sum_digit % 11
-    if remainder > 2:
+    if remainder >= 2:
         return 11 - remainder == control_digit
     else:
         return remainder == control_digit
-
