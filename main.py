@@ -159,6 +159,7 @@ async def select_step(user: User):
                 if f'IQ-{iq.value}' not in student:
                     from iq import iq_question_callback
                     if iq in [IQQuestion.Q2, IQQuestion.Q3, IQQuestion.Q4]:
+                        update_student(user, {'finished': False})
                         res = await iq_question_callback[iq](user, client)
                         update_student(user, res)
                         await select_step(user)
