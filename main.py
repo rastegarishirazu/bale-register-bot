@@ -213,11 +213,8 @@ def student_info(student: dict):
             if fild in [r.value for r in RegisterMode]:
                 mode = RegisterMode(fild)
                 title = register_mode_fild_name[mode]
-            elif fild in [i.value for i in IQQuestion]:
-                mode = IQQuestion(fild)
-                title = mode
             else:
-                return 'error'
+                continue
             message += f'{title}: {student[fild]}\n'
     return message
 
