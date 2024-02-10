@@ -1,6 +1,5 @@
 import csv
 import time
-from pprint import pprint
 
 from bale import (
     Bot,
@@ -8,8 +7,7 @@ from bale import (
     Message,
     InlineKeyboardMarkup,
     InlineKeyboardButton,
-    MenuKeyboardMarkup,
-    MenuKeyboardButton,
+
     User, InputFile,
 )
 from setting import BALE_TOKEN, BACKUP_CHANEL
@@ -23,7 +21,7 @@ from content import (
     list_of_programming_level,
     social_activity_list,
     future_fild_list,
-    have_laptop_list, SAY_BYE, chanel_address, register_mode_fild_name, MENU_LIST, SAY_FINISHED, sex_list,
+    have_laptop_list, SAY_BYE, chanel_address, register_mode_fild_name, MENU_LIST, SAY_FINISHED, sex_list, IQQuestion,
 )
 from utils.menu import create_menu, edit_menu
 from utils.national_code_checker import verify_national_code
@@ -60,7 +58,7 @@ selection_button_list = {
 }
 
 
-def reply_to_asnwer_message(user: User, mode: RegisterMode) -> str:
+def reply_to_answer_message(user: User, mode: RegisterMode) -> str:
     student = get_student_from_user(user)  # type: ignore
     if student:
         if mode == RegisterMode.FIRST_NAME:
@@ -123,7 +121,7 @@ def get_student_from_user(user: User):
     return student
 
 
-def updata_student(user: User, data: dict):
+def update_student(user: User, data: dict):
     db.update_one({"_id": f"{user.user_id}"}, {"$set": data})
 
 
@@ -157,13 +155,25 @@ async def select_step(user: User):
         elif RegisterMode.WICH_TOWN.value not in student:
             await register_town(user)
         else:
+            for iq in IQQuestion:
+                if f'IQ-{iq.value}' not in student:
+                    from iq import iq_question_callback
+                    if iq in [IQQuestion.Q2, IQQuestion.Q3, IQQuestion.Q4]:
+                        res = await iq_question_callback[iq](user, client)
+                        update_student(user, res)
+                        await select_step(user)
+                    else:
+                        await iq_question_callback[iq](user)
+                    return
             if student['finished']:
                 backup_message_id = student['backup_message_id']
-                await client.edit_message(BACKUP_CHANEL, backup_message_id, text=student_info(student))
+                if BACKUP_CHANEL:
+                    await client.edit_message(BACKUP_CHANEL, backup_message_id, text=student_info(student))
                 await user.send(SAY_FINISHED, components=create_menu())
             else:
-                message = await client.send_message(BACKUP_CHANEL, text=student_info(student))
-                updata_student(user, {'backup_message_id': message.message_id, 'finished': True})
+                if BACKUP_CHANEL:
+                    message = await client.send_message(BACKUP_CHANEL, text=student_info(student))
+                    update_student(user, {'backup_message_id': message.message_id, 'finished': True})
                 await user.send(SAY_BYE, components=create_menu())
 
 
@@ -184,20 +194,29 @@ async def select_button(user: User, mode: RegisterMode):
     await user.send(personality_qustion[mode], components=markup_select)
 
 
-async def save_button_selection(user: User, data: str):
+async def save_button_selection(user: User, data: str, iq_question_mode=False):
     callback_data = data.split(":")
     str_mode = callback_data[0]
     index_of_button = int(callback_data[1])
-    updata_student(user, {str_mode: selection_button_list[RegisterMode(str_mode)][index_of_button]})  # type: ignore
-    await reply_to_answer(user, RegisterMode(str_mode))
+    if iq_question_mode:
+        update_student(user, {str_mode: index_of_button})  # type: ignore
+    else:
+        update_student(user, {str_mode: selection_button_list[RegisterMode(str_mode)][index_of_button]})  # type: ignore
+        await reply_to_answer(user, RegisterMode(str_mode))
 
 
 def student_info(student: dict):
     message = ''
     for fild in student:
         if fild not in ['_id', 'finished', 'backup_message_id']:
-            mode = RegisterMode(fild)
-            title = register_mode_fild_name[mode]
+            if fild in [r.value for r in RegisterMode]:
+                mode = RegisterMode(fild)
+                title = register_mode_fild_name[mode]
+            elif fild in [i.value for i in IQQuestion]:
+                mode = IQQuestion(fild)
+                title = mode
+            else:
+                return 'error'
             message += f'{title}: {student[fild]}\n'
     return message
 
@@ -283,7 +302,7 @@ async def reply_to_answer(
         await select_step(user)
         return
     else:
-        message_reply = reply_to_asnwer_message(user, mode)
+        message_reply = reply_to_answer_message(user, mode)
         reply_markup_verify_name = InlineKeyboardMarkup()
         reply_markup_verify_name.add(
             InlineKeyboardButton(text="آره", callback_data=f"{mode.value}:accept")
@@ -304,8 +323,8 @@ async def register_personality(user: User, mode: RegisterMode, check_func=None):
         if check_func and not check_func(student_answer.content):
             await student_answer.reply('مقدار وارد شده صحیح نمیباشد.')
             return register_personality(user, mode, check_func)
-        if student_answer.from_user:
-            updata_student(student_answer.from_user, {mode.value: student_answer.content})
+        elif student_answer.from_user:
+            update_student(student_answer.from_user, {mode.value: student_answer.content})
         else:
             print("error in student_answer")
 
@@ -377,6 +396,9 @@ async def on_callback(callback: CallbackQuery):
             or RegisterMode.SEX.value in callback.data
     ):
         await save_button_selection(user, callback.data)
+    elif "IQ-" in callback.data:
+        await save_button_selection(user, callback.data, iq_question_mode=True)
+        await select_step(user)
 
 
 while True:

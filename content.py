@@ -20,6 +20,18 @@ class RegisterMode(Enum):
     WICH_TOWN = "town"
 
 
+class IQQuestion(Enum):
+    Q2 = "q2"
+    Q3 = "q3"
+    Q4 = 'q4'
+    Q5 = "q5"
+    Q6 = "q6"
+    Q7 = "q7"
+    Q8 = "q8"
+    Q9 = "q9"
+    Q10 = "q10"
+
+
 register_mode_fild_name = {
     RegisterMode.FIRST_NAME: "نام",
     RegisterMode.LAST_NAME: "نام خانوادگی",
@@ -64,6 +76,17 @@ personality_qustion = {
     RegisterMode.SOCIAL_ACTIVITY: "کجا فعالیت میکنی؟",
     RegisterMode.FUTURE_FILD: "چه رشتی ای هستی؟ یا در آینده چه رشته ای میخوای بری؟",
     RegisterMode.WICH_TOWN: "خونه تون کجاست؟ (توی چه محله ای)",
+}
+iq_question_content = {
+    IQQuestion.Q2: "سوال ۲) جواب خود را به صورت یک عدد چند رقمی ارسال کنید:(مانند مثال اول)",
+    IQQuestion.Q3: "سوال ۳) جواب خود را به صورت یک عدد چند رقمی ارسال کنید:(مانند مثال اول)",
+    IQQuestion.Q4: "سوال ۴) جواب خود را به صورت یک عدد چند رقمی ارسال کنید:(مانند مثال اول)",
+    IQQuestion.Q5: "سوال ۵) سازمان آب طبق شکل ...",
+    IQQuestion.Q6: "سوال ۶) اگر علی روی میز بایستد...",
+    IQQuestion.Q7: "سوال ۷) کدام شکل زیر توسط تعدادی ...",
+    IQQuestion.Q8: "سوال ۸) در کدام شکل تعداد مربع سفید کمتر ...",
+    IQQuestion.Q9: "سوال ۹) اگر حریم هوایی فرودگاه های واقع...",
+    IQQuestion.Q10: "سوال ۱۰) در یک مهمانی ..."
 }
 future_fild_list = ["ریاضی", "تجربی", "انسانی", "هنرستان"]
 sex_list = ['پسر', 'دختر']
