@@ -35,15 +35,15 @@ def check_graph_question(text):
 
 
 async def iq_test_q2(user: User, client):
-    return await descriptive_question(user, client, IQQuestion.Q2, check_graph_question)
+    return await descriptive_question(user, client, IQQuestion.Q2)
 
 
 async def iq_test_q3(user: User, client):
-    return await descriptive_question(user, client, IQQuestion.Q3, check_graph_question)
+    return await descriptive_question(user, client, IQQuestion.Q3)
 
 
 async def iq_test_q4(user: User, client):
-    return await descriptive_question(user, client, IQQuestion.Q4, check_graph_question)
+    return await descriptive_question(user, client, IQQuestion.Q4)
 
 
 async def iq_test_q5(user: User):
