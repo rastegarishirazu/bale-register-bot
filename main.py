@@ -168,8 +168,8 @@ async def select_step(user: User):
                     return
             if student['finished']:
                 backup_message_id = student['backup_message_id']
-                if BACKUP_CHANEL:
-                    await client.edit_message(BACKUP_CHANEL, backup_message_id, text=student_info(student))
+                # if BACKUP_CHANEL:
+                    # await client.edit_message(BACKUP_CHANEL, backup_message_id, text=student_info(student))
                 await user.send(SAY_FINISHED, components=create_menu())
             else:
                 if BACKUP_CHANEL:
