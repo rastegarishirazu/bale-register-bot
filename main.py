@@ -166,6 +166,8 @@ async def select_step(user: User):
                     else:
                         await iq_question_callback[iq](user)
                     return
+                elif f'IQ-{iq.value}' == 'IQ-q10':
+                    update_student(user, {'finished': True})
             if student['finished']:
                 backup_message_id = student['backup_message_id']
                 # if BACKUP_CHANEL:
