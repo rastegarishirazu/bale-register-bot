@@ -24,7 +24,7 @@ async def on_ready():
 
 async def send_message_to_pending_user(db: Collection[Mapping[str, Any]]):
     for user in db.find():
-        pprint(user)
+        print(user['_id'])
         if ('finished' in user and not user['finished']) or 'IQ-q2' not in user or 'finished' not in user:
             user = await client.get_user(user['_id'])
             if user:
