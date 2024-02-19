@@ -22,7 +22,7 @@ edit_iq_btn = "/edit_iq_test"
 
 @client.event
 async def on_ready():
-    await send_message_to_user(db)
+    await send_message_to_user(db, True)
 
 
 async def send_message_to_user(data_base: Collection[Mapping[str, Any]], pending_user=False):
@@ -33,8 +33,8 @@ async def send_message_to_user(data_base: Collection[Mapping[str, Any]], pending
             try:
                 user = await client.get_user(student['_id'])
                 if user:
-                        await user.send(edit_iq_message)
-                        await user.send(edit_iq_btn)
+                        await user.send(pending_user_message_text)
+                        await user.send(start_message)
             except Exception as ex:
                 print(Exception)
                 continue
