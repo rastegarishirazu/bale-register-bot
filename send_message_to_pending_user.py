@@ -1,4 +1,3 @@
-from pprint import pprint
 from typing import Mapping, Any
 
 import pymongo
@@ -20,6 +19,7 @@ edit_iq_message = '''سلامی دوباره!
 فقط کاملا دقت کنید که با زدن گزینه زیر تمام پاسخ های قبلی شما حذف خواهد شد.'''
 edit_iq_btn = "/edit_iq_test"
 
+
 @client.event
 async def on_ready():
     await send_message_to_user(db)
@@ -32,8 +32,12 @@ async def send_message_to_user(data_base: Collection[Mapping[str, Any]], pending
             'finished']) or 'IQ-q2' not in student or 'finished' not in student) or not pending_user:
             user = await client.get_user(student['_id'])
             if user:
-                await user.send(edit_iq_message)
-                await user.send(edit_iq_btn)
+                try:
+                    await user.send(edit_iq_message)
+                    await user.send(edit_iq_btn)
+                except Exception as ex:
+                    print(Exception)
+                    continue
 
 
 if __name__ == "__main__":
