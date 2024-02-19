@@ -1,6 +1,7 @@
 import csv
 import time
 
+import pymongo
 from bale import (
     Bot,
     CallbackQuery,
@@ -10,8 +11,7 @@ from bale import (
 
     User, InputFile,
 )
-from setting import BALE_TOKEN, BACKUP_CHANEL
-import pymongo
+
 from content import (
     SAY_WELLCOME,
     personality_qustion,
@@ -23,6 +23,8 @@ from content import (
     future_fild_list,
     have_laptop_list, SAY_BYE, chanel_address, register_mode_fild_name, MENU_LIST, SAY_FINISHED, sex_list, IQQuestion,
 )
+from iq import remove_all_iq_question_from_user
+from setting import BALE_TOKEN, BACKUP_CHANEL
 from utils.menu import create_menu, edit_menu
 from utils.national_code_checker import verify_national_code
 
@@ -171,7 +173,7 @@ async def select_step(user: User):
             if student['finished']:
                 backup_message_id = student['backup_message_id']
                 # if BACKUP_CHANEL:
-                    # await client.edit_message(BACKUP_CHANEL, backup_message_id, text=student_info(student))
+                # await client.edit_message(BACKUP_CHANEL, backup_message_id, text=student_info(student))
                 await user.send(SAY_FINISHED, components=create_menu())
             else:
                 if BACKUP_CHANEL:
@@ -368,6 +370,9 @@ async def on_message(message: Message):
     elif message.content == '/مشاهده_اطلاعات':
         student_info_message = student_info(student)
         await message.reply(text=student_info_message)
+    elif message.content == '/edit_iq_test':
+        remove_all_iq_question_from_user(message.from_user, db)
+        await select_step(message.from_user)
 
 
 @client.event

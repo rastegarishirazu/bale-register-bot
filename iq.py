@@ -1,4 +1,7 @@
+from typing import Mapping, Any
+
 from bale import User, InlineKeyboardMarkup, InlineKeyboardButton
+from pymongo.collection import Collection
 
 from content import IQQuestion, iq_question_content
 
@@ -21,9 +24,14 @@ async def descriptive_question(user: User, client, question: IQQuestion, check_f
     student_answer = await client.wait_for(event_name="message")
     if check_func and not check_func(student_answer.content):
         await student_answer.reply('مقدار وارد شده صحیح نمیباشد.')
-        return descriptive_question(user,client, question, check_func)
+        return descriptive_question(user, client, question, check_func)
     elif student_answer.from_user:
         return {f'IQ-{question.value}': student_answer.content}
+
+
+def remove_all_iq_question_from_user(user: User, db: Collection[Mapping[str, Any]]):
+    dict_of_iq_questions = dict([(f'IQ-{iq.value}', "") for iq in IQQuestion])
+    db.update_one({"_id": f"{user.user_id}"}, {"$unset": dict_of_iq_questions})
 
 
 def check_graph_question(text):
