@@ -28,7 +28,6 @@ async def on_ready():
 async def send_message_to_user(data_base: Collection[Mapping[str, Any]], pending_user=False):
     for student in data_base.find():
         print(student['_id'])
-        pprint(student)
         if (('finished' in student and not student[
             'finished']) or 'IQ-q2' not in student or 'finished' not in student) or not pending_user:
             user = await client.get_user(student['_id'])
