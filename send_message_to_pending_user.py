@@ -30,14 +30,14 @@ async def send_message_to_user(data_base: Collection[Mapping[str, Any]], pending
         print(student['_id'])
         if (('finished' in student and not student[
             'finished']) or 'IQ-q2' not in student or 'finished' not in student) or not pending_user:
-            user = await client.get_user(student['_id'])
-            if user:
-                try:
-                    await user.send(edit_iq_message)
-                    await user.send(edit_iq_btn)
-                except Exception as ex:
-                    print(Exception)
-                    continue
+            try:
+                user = await client.get_user(student['_id'])
+                if user:
+                        await user.send(edit_iq_message)
+                        await user.send(edit_iq_btn)
+            except Exception as ex:
+                print(Exception)
+                continue
 
 
 if __name__ == "__main__":
